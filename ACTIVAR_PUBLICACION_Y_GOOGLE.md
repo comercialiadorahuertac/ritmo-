@@ -21,19 +21,12 @@ Una alternativa es crear un proyecto Pages nuevo conectado a GitHub con output d
 
 Documentación oficial: https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
 
-## Google y perfiles: bloqueo verificado
+## Google y perfil directo en Supabase
 
-El Worker público configurado en config.js responde `Ruta inexistente` tanto en GET /api/config como en GET /api/me. La app tiene la interfaz OAuth y de perfiles, pero el backend publicado no expone esos contratos. El ZIP no incluye el código del Worker ni migraciones D1.
+Se encontró y verificó el proyecto `ritmo-club` (`efykismzljctzmrlwluo`). Su proveedor Google está habilitado y /auth/v1/authorize abre la pantalla de Google. Se configuraron URL y clave publishable públicas en config.js.
 
-Para terminar se requiere acceso al proyecto Supabase correcto y a la configuración/código del Worker existente. No se reemplazará el Worker ni se recreará D1 sin revisar sus datos y rutas.
+La app ya no necesita /api/config ni /api/me del Worker para iniciar sesión y gestionar perfiles: account.js usa la tabla existente profiles con JWT del usuario y RLS, sin service_role. SELECT/INSERT/UPDATE para authenticated están habilitados; INSERT y UPDATE limitan id a auth.uid(), y UPDATE también tiene WITH CHECK. No se cambiaron tablas ni políticas.
 
-La comprobación debe incluir:
-1. Obtener del Worker la URL de Supabase y clave pública anon/publishable a través de /api/config. Nunca exponer service_role ni el Google Client Secret al navegador.
-2. Confirmar proveedor Google habilitado en Supabase, con OAuth client ID/secret del proyecto propietario de Google Cloud.
-3. Confirmar URI de callback que indique Supabase, y URLs de retorno permitidas para la dirección real de RITMO.
-4. Verificar que /api/me crea/lee el perfil del usuario validando su JWT y que los datos se aíslan por su identidad; revisar también /api/players, /api/invitations y /api/stats/me que consume account.js.
-5. Probar dos cuentas distintas: login, retorno, perfil propio, cierre de sesión y permisos de invitaciones/partidos.
+Los partidos de Retas siguen en el Worker/D1 actual. Las invitaciones entre cuentas y estadísticas no se anuncian como activas: los usuarios pueden compartir los enlaces actuales. Estas funciones necesitan aún enlazar los dos sistemas con el código/configuración del Worker.
 
-Documentación oficial: https://supabase.com/docs/guides/auth/social-sign-in/auth-google
-
-La configuración administrativa y las pruebas con dos identidades aún no están completadas.
+Pruebas adicionales: cuatro pruebas de perfiles (dos identidades separadas, creación inicial, edición por usuario autenticado y opciones de Google) aprobadas. Nueve pruebas de lógica totales y batería de navegador aprobadas. Pendiente publicar este frontend y completar un login real con retorno para verificar la lista de URLs permitidas; no se afirma haber iniciado sesión con dos cuentas de Google reales.

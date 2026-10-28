@@ -35,7 +35,7 @@ Las pruebas de navegador levantan su propio servidor, usan perfiles desechables 
 
 ## Integraciones y despliegue
 
-`account.js` y `config.js` se conservan idénticos al ZIP. No se cambian endpoints, cuerpos de solicitudes, PKCE, OAuth ni esquema de D1. El ZIP suministra el frontend; no incluye código del Worker ni migraciones D1.
+`account.js` y `config.js` conectan Google y perfiles directamente al proyecto Supabase existente, usando únicamente su clave pública y las políticas de propietario existentes. Se conserva PKCE y el Worker/D1 de Retas. Las invitaciones entre cuentas y estadísticas remotas no están activadas. El ZIP suministra el frontend; no incluye código del Worker ni migraciones D1.
 
 No se ha desplegado ni fusionado esta rama. La validación autenticada de Google/Supabase y el backend Worker/D1 queda pendiente en un entorno de prueba autorizado. La emulación móvil no sustituye una prueba en un teléfono físico con Safari/iOS.
 
@@ -45,4 +45,4 @@ El menú Fuerza y todos los accesos rápidos abren fuerza.html directamente. Las
 
 Cada sección tiene una escena cinética: cancha en Inicio, carriles en Agenda, rally en Retas, órbitas cálidas en Comidas, pulso de concentración en Focus y ascenso en Progreso. Fuerza reduce la intensidad visual durante la sesión. El control «Fondo» permite pausar el movimiento; la preferencia persiste y respeta movimiento reducido y pestaña en segundo plano. No se descargan videos pesados.
 
-Se preparó publicación automática de vistas previas mediante GitHub Actions, desactivada hasta configurar Cloudflare. Ver ACTIVAR_PUBLICACION_Y_GOOGLE.md. Google y perfiles siguen pendientes de corregir el Worker y autorizar acceso administrativo.
+Se preparó publicación automática de vistas previas mediante GitHub Actions, desactivada hasta configurar Cloudflare. Ver ACTIVAR_PUBLICACION_Y_GOOGLE.md. Google ya estaba habilitado en Supabase. La nueva configuración obtiene y actualiza el perfil directamente en la tabla existente profiles; las invitaciones entre cuentas y estadísticas siguen pendientes de completar en el backend.
