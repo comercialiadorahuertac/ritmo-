@@ -5,6 +5,7 @@
  */
 window.RITMO_CONFIG = {
   workerUrl: 'https://ritmo-retas-api.comercialiadorahuertac.workers.dev',
-  supabaseUrl: '',
-  supabaseAnonKey: ''
+  supabaseUrl: 'https://efykismzljctzmrlwluo.supabase.co',
+  supabaseAnonKey: 'sb_publishable_bFmqySQPxe81Cu8eMVib8Q_VFAK8PfQ',
+  directProfiles: true
 };

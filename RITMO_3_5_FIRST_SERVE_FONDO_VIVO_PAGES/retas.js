@@ -35,7 +35,7 @@
  function card(match){
    const full=(match.teams||[]).every(a=>a.length >= (match.format==='singles'?1:2));
    const status=match.status==='finalizado'?'Finalizado':match.status==='jugando'?'En juego':match.mode==='abierta'&&!full?'Reta abierta':'Programado';
-   const badge=match.mode==='abierta'&&!full?'open':match.status==='finalizado'?'done':'';
+   const badge=match.status==='finalizado'?'done':match.mode==='abierta'&&!full?'open':'';
    return `<button type="button" class="reta-card" data-reta="open" data-id="${escape(match.id)}"><div class="reta-card-top"><span class="reta-sport">${emot[match.sport]||'🎾'} ${escape(sport[match.sport]||match.sport)} · ${match.format==='singles'?'Singles':'Dobles'}</span><span class="reta-pill ${badge}">${status}</span></div><div class="reta-card-players"><span>${escape((match.teams?.[0]||[]).join(' · ')||'Equipo A')}</span><small>VS</small><span>${escape((match.teams?.[1]||[]).join(' · ')||'Rivales por definir')}</span></div><div class="reta-card-bottom"><span>◷ ${escape(match.date)} · ${escape(match.time)}</span><span>${escape(match.place||'Sede por definir')}</span></div></button>`;
  }
  function main(){
@@ -63,7 +63,7 @@
     <div class="score-teams"><div class="score-team"><span class="team-label">EQUIPO A</span>${match.teams[0].length?match.teams[0].map(n=>`<strong>${escape(n)}</strong>`).join(''):'<span>Por confirmar</span>'}</div><span class="vs-badge">VS</span><div class="score-team right"><span class="team-label">EQUIPO B</span>${match.teams[1].length?match.teams[1].map(n=>`<strong>${escape(n)}</strong>`).join(''):'<span>Por confirmar</span>'}</div></div>
     <div class="sets"><div class="sets-titles"><span>Equipo A</span><span>${label}</span><span>Equipo B</span></div>${match.sets?.length?match.sets.map((s,i)=>`<div class="set-line"><strong>${s.a}</strong><span>${label} ${i+1}</span><strong>${s.b}</strong></div>`).join(''):'<div class="sets-placeholder">Aún no hay marcador registrado</div>'}</div></div>
    ${match.note?`<p class="reta-comment">${escape(match.note)}</p>`:''}
-   <div class="reta-actions"><button class="btn" data-reta="share" data-id="${escape(match.id)}">↗ Compartir invitación</button>${host?`<button class="btn btn-outline" data-reta="edit" data-id="${escape(match.id)}">✎ Editar / marcador</button>`:''}${host&&cloud?`<button class="btn btn-soft" data-reta="invite-player">＋ Invitar jugador registrado</button>`:''}${cloud?`<button class="btn btn-soft" data-reta="refresh">↻ Actualizar</button>`:''}</div>
+   <div class="reta-actions"><button class="btn" data-reta="share" data-id="${escape(match.id)}">↗ Compartir invitación</button>${host?`<button class="btn btn-outline" data-reta="edit" data-id="${escape(match.id)}">✎ Editar / marcador</button>`:''}${host&&cloud&&window.RitmoAuth?.supportsInvites?.()!==false?`<button class="btn btn-soft" data-reta="invite-player">＋ Invitar jugador registrado</button>`:''}${cloud?`<button class="btn btn-soft" data-reta="refresh">↻ Actualizar</button>`:''}</div>
    <div class="reta-roster"><div class="reta-section-head"><div><h2>Jugadores</h2><p>${num} de ${cap*2} lugares</p></div><span class="reta-pill ${open?'open':''}">${open?'Inscripción abierta':'Lista de jugadores'}</span></div>
     <div class="reta-roster-cells">${[0,1].map(i=>`<div class="reta-roster-side"><b>Equipo ${i===0?'A':'B'}</b>${Array.from({length:cap},(_,j)=>`<div class="reta-slot"><span>${escape(match.teams[i][j]||'Lugar disponible')}</span>${!match.teams[i][j]?'<span class="slot-plus">+</span>':''}</div>`).join('')}</div>`).join('')}</div>
     ${open&&!host?`<form id="reta-join-form" data-match="${escape(match.id)}"><div class="field"><label>Apúntate a esta reta</label><input name="name" maxlength="40" placeholder="Tu nombre" required></div><div class="field"><label>Equipo</label><select name="team"><option value="0">Equipo A</option><option value="1">Equipo B</option></select></div><button class="btn full" type="submit" ${busy?'disabled':''}>Confirmar mi lugar</button></form>`:''}
@@ -82,7 +82,7 @@
    if(!res.ok)throw new Error(x.error||`Error ${res.status}`);
    return x;
  }
- function upsert(match){const i=store.matches.findIndex(x=>x.id===match.id);if(i<0)store.matches.unshift(match);else store.matches[i]={...store.matches[i],...match};persist()}
+ function upsert(match,sourceSportId=null){const i=store.matches.findIndex(x=>x.id===match.id);if(i<0)store.matches.unshift(match);else store.matches[i]={...store.matches[i],...match};persist();window.RitmoAddSportMatch?.(store.matches.find(x=>x.id===match.id),sourceSportId)}
  async function refresh(quiet=false){const m=getSelected();if(!m||m.localOnly)return;try{const r=await api('/api/matches/'+m.id);const prev=Number(m.version||0);upsert(r.match);if(!quiet||Number(r.match.version)!==prev)syncRender();if(!quiet)notify('Marcador actualizado')}catch(e){if(!quiet)notify(errorString(e))}}
  async function loadCloudMatches(){
   if(!store.api||!window.RitmoAuth?.token||!await window.RitmoAuth.token())return;
@@ -148,8 +148,8 @@
     let saved;
     if(store.api){const result=await api('/api/matches',{method:'POST',body:JSON.stringify(match)});saved={...result.match,hostKey:result.hostKey,ownerAuthenticated:!!(await window.RitmoAuth?.token?.()),localOnly:false};}
     else saved={...match,id:uid(),version:1,localOnly:true,inviteOnly:false};
-    upsert(saved);selected=saved.id;close();renderOrRoute();notify('Partido creado. Ya puedes invitar a tus rivales.');
-    if(window.RitmoAddSportMatch && !originSportId)window.RitmoAddSportMatch(saved);originSportId=null;
+    upsert(saved,originSportId);selected=saved.id;close();renderOrRoute();notify('Partido creado. Ya puedes invitar a tus rivales.');
+    originSportId=null;
     return;
    }
    if(f.id==='reta-edit-form'){
@@ -167,5 +167,5 @@
   }catch(e){notify(errorString(e))}finally{busy=false}
  });
  document.getElementById('reta-dialog').addEventListener('click',e=>{if(e.target.id==='reta-dialog')close()});
- window.Retas={render,loadCloudMatches, hasDeepLink:()=>Boolean(deepLink.searchParams.get('match')||deepLink.searchParams.get('inv')), refresh, startPoll, openCreate:()=>{originSportId=null;modal(createForm())},fromSport:(s,date)=>{originSportId=s.id;modal(createForm());const f=document.getElementById('reta-create-form');if(!f)return;f.elements.sport.value=s.type;f.elements.date.value=date;f.elements.time.value=s.time||'19:00';const names=String(s.rivals||'').split(/[,;]+/).map(x=>x.trim()).filter(Boolean);f.elements.b1.value=names[0]||'';f.elements.b2.value=names[1]||'';}};
+ window.Retas={openMatch:id=>{if(!store.matches.some(m=>m.id===id))return;selected=id;window.RitmoNavigate?.('retas');startPoll();},getMatches:()=>store.matches.map(m=>({...m})),render,loadCloudMatches, hasDeepLink:()=>Boolean(deepLink.searchParams.get('match')||deepLink.searchParams.get('inv')), refresh, startPoll, openCreate:()=>{originSportId=null;modal(createForm())},fromSport:(s,date)=>{originSportId=s.id;modal(createForm());const f=document.getElementById('reta-create-form');if(!f)return;f.elements.sport.value=s.type;f.elements.date.value=date;f.elements.time.value=s.time||'19:00';const names=String(s.rivals||'').split(/[,;]+/).map(x=>x.trim()).filter(Boolean);f.elements.b1.value=names[0]||'';f.elements.b2.value=names[1]||'';}};
 })();

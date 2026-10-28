@@ -41,6 +41,7 @@
   let daySelected = TODAY();
   let currentTab = window.Retas?.hasDeepLink() ? 'retas' : 'inicio';
   let toastTimer;
+  let statisticsRange=7;
   const view = document.getElementById('view');
   const dialog = document.getElementById('editor-dialog');
   const dialogContent = document.getElementById('dialog-content');
@@ -97,7 +98,7 @@
   function activityList(date, editing=true){
     const sports=dayData(date).sports||[];
     if(!sports.length) return `<p class="empty-note">Todavía no hay partidos anotados. Agrega uno si tienes tenis, pádel o pickleball, incluso para mañana.</p>`;
-    return sports.map(s=>`<div class="activity-line"><span class="activity-icon">${ic('ball')}</span><div class="activity-main"><strong>${html(sportType[s.type]||s.type)} <span class="pill ${s.done?'done':''}">${s.done?'Realizado':'Programado'}</span></strong><small>${s.time?html(s.time)+' · ':''}${fmt(s.minutes)} min · ${html(efforts[s.effort]||'Moderado')}${s.rivals?' · Rivales: '+html(s.rivals):''}</small></div>${editing?`<div class="activity-actions">${['tenis','padel','pickleball'].includes(s.type)?`<button class="mini-icon-btn invite-sport" data-action="make-reta" data-id="${html(s.id)}" title="Crear reta y compartir con rivales" aria-label="Crear reta">${ic('share')}</button>`:''}<button class="mini-icon-btn ${s.done?'complete':''}" data-action="toggle-sport" data-id="${html(s.id)}" title="Marcar realizado / programado" aria-label="${s.done?'Cambiar a programado':'Marcar realizado'}">${ic('check')}</button><button class="mini-icon-btn" data-action="edit-sport" data-id="${html(s.id)}" aria-label="Editar partido">${ic('edit')}</button></div>`:''}</div>`).join('');
+    return sports.map(s=>`<div class="activity-line"><span class="activity-icon">${ic('ball')}</span><div class="activity-main"><strong>${html(sportType[s.type]||s.type)} <span class="pill ${s.done?'done':''}">${s.done?'Realizado':s.status==='jugando'?'En juego':'Programado'}</span></strong><small>${s.time?html(s.time)+' · ':''}${fmt(s.minutes)} min · ${html(efforts[s.effort]||'Moderado')}${s.rivals?' · Rivales: '+html(s.rivals):''}</small></div>${editing?`<div class="activity-actions">${['tenis','padel','pickleball'].includes(s.type)?`<button class="mini-icon-btn invite-sport" data-action="make-reta" data-id="${html(s.id)}" title="Crear reta y compartir con rivales" aria-label="Crear reta">${ic('share')}</button>`:''}<button class="mini-icon-btn ${s.done?'complete':''}" data-action="toggle-sport" data-id="${html(s.id)}" title="Marcar realizado / programado" aria-label="${s.done?'Cambiar a programado':'Marcar realizado'}">${ic('check')}</button><button class="mini-icon-btn" data-action="edit-sport" data-id="${html(s.id)}" aria-label="Editar partido">${ic('edit')}</button></div>`:''}</div>`).join('');
   }
   function mealLines(date, editing=false){const d=dayData(date);return Object.keys(meals).map(id=>{
     const item=d.meals?.[id],target=mealTarget(date,id),pct=item?Math.min(100,number(item.cal)/target.cal*100):0;
@@ -126,10 +127,18 @@
     <div class="accent-banner">${ic('target')}<span>Haz los movimientos con técnica y agrega dificultad poco a poco. Deja recuperación suficiente entre sesiones.</span></div>
     ${routines.map(r=>`<div class="routine-card ${done?.type===r.id && done.done?'is-completed':''}"><div class="routine-top"><div><h3>Rutina ${r.id} · ${r.name}</h3><p>35–50 min · 5 ejercicios</p></div><span class="routine-tag">${r.id}</span></div><ul class="exercise-list">${r.items.map(m=>`<li><span>${m[0]}</span><small>${m[1]}</small></li>`).join('')}</ul><div class="routine-buttons"><button class="btn ${done?.type===r.id && done.done?'btn-soft':''}" data-action="complete-workout" data-type="${r.id}">${ic('check')} ${done?.type===r.id && done.done?'Realizada hoy':'Marcar realizada hoy'}</button></div></div>`).join('')}
     <div class="disclaimer">La primera semana puedes empezar con 2 series por ejercicio. Para ganar músculo, procura que las últimas repeticiones sean exigentes, sin llegar al fallo en todas las series. Suspende ejercicios que causen dolor.</div>`;}
+  function statisticsView(){
+    let sessions=[],notice='';try{const raw=localStorage.getItem('ritmo-fuerza-sessions-v1');sessions=raw===null?[]:JSON.parse(raw);if(!Array.isArray(sessions))throw Error();}catch{sessions=[];notice='No se pudo leer el historial de Fuerza. Las cifras de sesiones pueden estar incompletas.';}
+    const s=window.RitmoStatistics.summarize(data,sessions,window.Retas?.getMatches?.()||[],daySelected,statisticsRange);
+    const names={tenis:'Tenis',padel:'Pádel',pickleball:'Pickleball',otro:'Otro'};
+    const metric=(label,value,sub)=>`<div class="stat-box"><div class="stat-label">${label}</div><strong>${value}</strong><small>${sub}</small></div>`;
+    const series=Object.entries(s.daily).sort(([a],[b])=>a.localeCompare(b));const max=Math.max(1,...series.map(([,n])=>n));
+    return `<section class="statistics-panel" aria-label="Estadísticas deportivas"><div class="section-head"><div><h2>Tu ritmo, en números</h2><p>${statisticsRange==='all'?'Historial hasta ':html(s.start)+' al '}${html(s.end)}</p></div></div><div class="statistics-filters" role="group" aria-label="Periodo de estadísticas">${[[7,'7 días'],[30,'30 días'],['all','Historial']].map(([n,label])=>`<button class="btn btn-soft" data-action="statistics-range" data-range="${n}" aria-pressed="${statisticsRange===n}">${label}</button>`).join('')}</div>${notice?`<p role="status">${notice}</p>`:''}<div class="statistics-grid">${metric('Días activos',s.activeDays,'con actividad realizada')}${metric('Minutos registrados',fmt(s.totalMinutes),'deporte + Fuerza cronometrada')}${metric('Partidos realizados',s.played,s.planned+' pendientes en el periodo')}${metric('Fuerza completa',s.complete,'sesiones del reproductor')}${metric('Fuerza parcial',s.partial,fmt(s.strengthMinutes)+' min cronometrados en total')}${metric('Días con comidas',s.mealDays,'con al menos un registro')}</div><p class="form-note">Los minutos de deporte son la duración anotada en Agenda; pueden ser estimados. ${s.manual?s.manual+' registro(s) manual(es) de Fuerza sin duración, excluidos de minutos y sesiones del reproductor. ':''}Estadísticas de este dispositivo.</p><details class="card statistics-detail"><summary>Actividad por día y deporte</summary>${series.length?`<ul class="statistics-bars">${series.map(([date,n])=>`<li><span>${html(date)}</span><meter min="0" max="${max}" value="${n}">${fmt(n)} min</meter><b>${fmt(n)} min</b></li>`).join('')}</ul>`:'<p class="empty-note">Registra un partido realizado o termina una sesión de Fuerza para ver tu actividad.</p>'}<p>${Object.entries(s.bySport).map(([sport,n])=>`${html(names[sport]||sport)}: ${n}`).join(' · ')||'Sin partidos realizados en este periodo.'}</p></details><details class="card statistics-detail"><summary>Resultados · ${s.scored} partido(s) con marcador</summary><p class="form-note">Resultados de los equipos. No se atribuyen victorias personales sin identificar tu equipo.</p>${s.results.length?s.results.slice(0,30).map(r=>`<div class="statistics-result"><small>${html(r.date)}</small><strong>${html((r.teams[0]||[]).join(' / ')||'Equipo A')} vs ${html((r.teams[1]||[]).join(' / ')||'Equipo B')}</strong><span>${r.sets.length?r.sets.map(x=>x.a+'–'+x.b).join(' · '):'Finalizado sin marcador'}</span></div>`).join(''):'<p class="empty-note">Finaliza una Reta y guarda sus sets para verla aquí.</p>'}</details></section>`;
+  }
   function progressView(){const rows=[...data.measurements].sort((a,b)=>b.date.localeCompare(a.date));const weekStart=sameWeekStart(daySelected);let active=0,strength=0;
     for(let i=0;i<7;i++){const day=dayData(addDays(weekStart,i));if((day.sports||[]).some(s=>s.done))active++;if(day.workout?.done)strength++;}
     const latest=rows[0];const lastWeight=rows.find(x=>Number(x.weight)>0);const lastWaist=rows.find(x=>Number(x.waist)>0);const earliest=rows.length>1?rows[rows.length-1]:null;
-    return `<span class="section-label">TU EVOLUCIÓN REAL</span><h1 class="page-title">Más fuerza, menos cintura.</h1><p class="page-subtitle">Tu peso no tiene que bajar rápido. También importa la reducción de cintura y mejorar en tus ejercicios.</p>
+    return `<span class="section-label">TU EVOLUCIÓN REAL</span><h1 class="page-title">Así llevas tu ritmo.</h1><p class="page-subtitle">Entrenamientos, partidos y evolución en un solo lugar.</p>${dateBar()}${statisticsView()}
     <div class="stat-row"><div class="stat-box"><div class="stat-label">Último peso</div><strong>${lastWeight?.weight?number(lastWeight.weight).toFixed(1):number(data.profile.weight).toFixed(1)} <small>kg</small></strong><small>${lastWeight?.date?html(lastWeight.date):'Peso inicial'}</small></div><div class="stat-box"><div class="stat-label">Última cintura</div><strong>${lastWaist?.waist?number(lastWaist.waist).toFixed(1):'—'} <small>cm</small></strong><small>${lastWaist?.waist?'Registro del '+html(lastWaist.date):'Aún sin medir'}</small></div></div>
     <div style="margin-top:13px"><button class="btn full" data-action="add-measure">${ic('plus')} Registrar peso y cintura</button></div>
     <div class="section-head"><div><h2>Evolución del peso</h2><p>Registra una vez a la semana para ver la tendencia</p></div></div><div class="chart-card">${lineChart('weight','kg',rows)}</div>
@@ -140,9 +149,9 @@
   function lineChart(key,unit,rows){const set=rows.filter(m=>number(m[key])>0).sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);
     if(set.length<2) return '<div class="chart-empty">Agrega al menos 2 mediciones para ver tu gráfica.</div>';
     const vals=set.map(m=>number(m[key]));const min=Math.min(...vals),max=Math.max(...vals),pad=Math.max(.4,(max-min)*.25),lo=min-pad,hi=max+pad;
-    const points=set.map((m,i)=>({x:32+i*(280/(set.length-1)),y:125-((number(m[key])-lo)/(hi-lo))*99,date:m.date,value:number(m[key])}));
+    const points=set.map((m,i)=>({x:32+280*(Date.parse(m.date+'T12:00:00')-Date.parse(set[0].date+'T12:00:00'))/Math.max(1,Date.parse(set[set.length-1].date+'T12:00:00')-Date.parse(set[0].date+'T12:00:00')),y:125-((number(m[key])-lo)/(hi-lo))*99,date:m.date,value:number(m[key])}));
     const paths=points.map(p=>`${p.x},${p.y}`).join(' ');
-    return `<svg viewBox="0 0 345 161" role="img" aria-label="Gráfica de ${key==='weight'?'peso':'cintura'} desde ${html(set[0].date)} hasta ${html(set[set.length-1].date)}"><path d="M32 26H312M32 75H312M32 125H312" stroke="#e6ece4" stroke-dasharray="3 5"/><text x="2" y="29" font-size="9" fill="#88978c">${hi.toFixed(0)}</text><text x="2" y="128" font-size="9" fill="#88978c">${lo.toFixed(0)}</text><polyline fill="none" stroke="#699d6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="${paths}"/>${points.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#ccf57a" stroke="#37674b" stroke-width="2"><title>${html(p.date)}: ${p.value} ${unit}</title></circle>`).join('')}<text x="32" y="150" fill="#84928b" font-size="10">${html(set[0].date.slice(5))}</text><text x="310" y="150" text-anchor="end" fill="#84928b" font-size="10">${html(set[set.length-1].date.slice(5))}</text></svg>`;
+    return `<svg viewBox="0 0 345 161" role="img" aria-label="Gráfica de ${key==='weight'?'peso':'cintura'} desde ${html(set[0].date)} hasta ${html(set[set.length-1].date)}"><path d="M32 26H312M32 75H312M32 125H312" stroke="#e6ece4" stroke-dasharray="3 5"/><text x="2" y="29" font-size="9" fill="#465c4e">${hi.toFixed(1)}</text><text x="2" y="128" font-size="9" fill="#465c4e">${lo.toFixed(1)}</text><polyline fill="none" stroke="#699d6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="${paths}"/>${points.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#ccf57a" stroke="#37674b" stroke-width="2"><title>${html(p.date)}: ${p.value} ${unit}</title></circle>`).join('')}<text x="32" y="150" fill="#465c4e" font-size="10">${html(set[0].date.slice(5))}</text><text x="310" y="150" text-anchor="end" fill="#465c4e" font-size="10">${html(set[set.length-1].date.slice(5))}</text></svg><details><summary>Ver mediciones de ${key==='weight'?'peso':'cintura'}</summary><table class="measure-table"><thead><tr><th>Fecha</th><th>${unit}</th></tr></thead><tbody>${set.map(m=>`<tr><td>${html(m.date)}</td><td>${number(m[key]).toFixed(1)}</td></tr>`).join('')}</tbody></table></details>`;
   }
   function settingsView(){const p=data.profile;
     return `<span class="section-label">PREFERENCIAS</span><h1 class="page-title">Tu perfil.</h1><p class="page-subtitle">Datos y objetivos de partida. Todo se guarda únicamente en este dispositivo.</p><div class="card"><form id="settings-form"><div class="fields-2"><div class="field"><label for="p-age">Edad (años)</label><input id="p-age" name="age" type="number" min="18" max="100" value="${html(p.age)}" required></div><div class="field"><label for="p-height">Estatura (cm)</label><input id="p-height" name="height" type="number" min="100" max="230" value="${html(p.height)}" required></div><div class="field"><label for="p-weight">Peso inicial (kg)</label><input id="p-weight" name="weight" type="number" step="0.1" min="30" max="300" value="${html(p.weight)}" required></div><div class="field"><label for="p-protein">Proteína (g/día)</label><input id="p-protein" name="protein" type="number" min="50" max="250" value="${html(p.protein)}" required></div></div><div class="field"><label for="p-base">Calorías base (día normal)</label><input id="p-base" name="baseCalories" type="number" min="1200" max="4500" step="50" value="${html(p.baseCalories)}" required></div><p class="form-note">La app ajusta esta base según tus partidos. Los cálculos son orientativos y pueden corregirse tras 2–3 semanas.</p><button class="btn full" type="submit">Guardar perfil</button></form></div>
@@ -180,6 +189,7 @@
     document.querySelectorAll('.nav-link').forEach(el=>{el.classList.toggle('is-active',el.dataset.tab===currentTab);});
     document.querySelectorAll('.nav-icon').forEach(el=>el.innerHTML=ic(el.dataset.icon));
     view.innerHTML=({inicio:homeView,actividad:activityView,comidas:mealsView,fuerza:strengthView,progreso:progressView,focus:()=>window.RitmoExtras.focusView(),retas:()=>window.Retas.render(),ajustes:settingsView}[currentTab]||homeView)();
+    window.RitmoAmbient?.setScene(currentTab);
     if(window.RitmoFirstServe) window.RitmoFirstServe.sync(currentTab);
     document.title = `Ritmo · ${({'inicio':'Mi día','actividad':'Actividad','comidas':'Comidas','fuerza':'Fuerza','focus':'Focus','progreso':'Progreso','retas':'Retas','ajustes':'Configuración'})[currentTab]}`;
   }
@@ -208,14 +218,15 @@
   function validBackup(x){return x&&x.version===1&&x.profile&&typeof x.profile==='object'&&x.days&&typeof x.days==='object'&&!Array.isArray(x.days)&&Array.isArray(x.measurements)&&Object.keys(x.days).length<10000;}
   function handleAction(el){const a=el.dataset.action;
     switch(a){
+      case 'statistics-range':statisticsRange=el.dataset.range==='all'?'all':Number(el.dataset.range)===30?30:7;render();break;
       case 'prev-day': daySelected=addDays(daySelected,-1);render();break;
       case 'next-day': daySelected=addDays(daySelected,1);render();break;
       case 'today':daySelected=TODAY();render();break;
-      case 'tab':currentTab=el.dataset.tab;render();scrollTopSafe();break;
+      case 'tab':navigate(el.dataset.tab);break;
       case 'add-sport':sportDialog();break;
-      case 'edit-sport':sportDialog(el.dataset.id);break;
-      case 'make-reta':{const s=(dayData(daySelected).sports||[]).find(x=>x.id===el.dataset.id);if(s){currentTab='retas';render();window.Retas?.fromSport(s,daySelected);}break;}
-      case 'toggle-sport':{const s=editableDay(daySelected).sports.find(x=>x.id===el.dataset.id);if(s){s.done=!s.done;save();render();toast(s.done?'Partido marcado como realizado.':'Partido marcado como programado.');}break;}
+      case 'edit-sport':{const s=dayData(daySelected).sports.find(x=>x.id===el.dataset.id);if(s?.matchId){window.Retas?.openMatch(s.matchId);}else sportDialog(el.dataset.id);break;}
+      case 'make-reta':{const s=(dayData(daySelected).sports||[]).find(x=>x.id===el.dataset.id);if(s){if(s.matchId){window.Retas?.openMatch(s.matchId);break;}currentTab='retas';render();window.Retas?.fromSport(s,daySelected);}break;}
+      case 'toggle-sport':{const s=editableDay(daySelected).sports.find(x=>x.id===el.dataset.id);if(s){if(s.matchId){window.Retas?.openMatch(s.matchId);toast('Actualiza el estado desde la reta vinculada.');break;}s.done=!s.done;save();render();toast(s.done?'Partido marcado como realizado.':'Partido marcado como programado.');}break;}
       case 'delete-sport':if(confirm('¿Eliminar este partido?')){const d=editableDay(daySelected);d.sports=d.sports.filter(x=>x.id!==el.dataset.id);save();dialog.close();render();}break;
       case 'edit-meal':mealDialog(el.dataset.meal);break;
       case 'delete-meal':if(confirm('¿Eliminar este registro de comida?')){delete editableDay(daySelected).meals[el.dataset.meal];save();dialog.close();render();}break;
@@ -234,7 +245,7 @@
     }
   }
   function scrollTopSafe(){window.scrollTo({top:0,behavior:'instant'});}
-  document.addEventListener('click',event=>{const t=event.target.closest('[data-action], [data-tab].nav-link');if(t){event.preventDefault();if(t.classList.contains('nav-link')){currentTab=t.dataset.tab;render();scrollTopSafe();}else handleAction(t);}});
+  document.addEventListener('click',event=>{const t=event.target.closest('[data-action], [data-tab].nav-link');if(t){event.preventDefault();if(t.classList.contains('nav-link')){navigate(t.dataset.tab);}else handleAction(t);}});
   document.getElementById('settings-btn').addEventListener('click',()=>{currentTab='ajustes';render();scrollTopSafe();});
   document.addEventListener('change',async e=>{
     if(e.target.id==='day-picker'&&/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)){daySelected=e.target.value;render();}
@@ -281,7 +292,20 @@
   if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
     window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('No se pudo habilitar modo sin conexión',e)));
   }
-  window.RitmoNavigate = (tab)=>{currentTab=tab;render();scrollTopSafe();};
-  window.RitmoAddSportMatch = m=>{const d=editableDay(m.date);if(d.sports.some(s=>s.matchId===m.id))return;d.sports.push({id:uid(),matchId:m.id,type:m.sport,minutes:90,effort:'moderado',time:m.time,rivals:(m.teams[1]||[]).join(', '),done:false});save();};
+  function navigate(tab){if(tab==='fuerza'){location.assign('./fuerza.html');return;}currentTab=tab;render();scrollTopSafe();}
+  window.RitmoNavigate = navigate;
+  window.RitmoAddSportMatch = (m,originId)=>{
+    if(!m?.id||!/^\d{4}-\d{2}-\d{2}$/.test(m.date))return;
+    let record=null;
+    for(const day of Object.values(data.days)){const hits=(day.sports||[]).filter(s=>s.matchId===m.id||(originId&&s.id===originId));if(hits.length){const source=originId&&hits.find(s=>s.id===originId);if(!record||source)record=source||hits[0];day.sports=day.sports.filter(s=>!hits.includes(s));}}
+    const d=editableDay(m.date);record??={id:uid(),minutes:90,effort:'moderado'};
+    d.sports.push({...record,matchId:m.id,type:m.sport,time:m.time,rivals:(m.teams?.[1]||[]).join(', '),done:m.status==='finalizado',status:m.status||'programado'});save();
+  };
+  for(const m of window.Retas?.getMatches?.()||[])window.RitmoAddSportMatch(m);
+
+  function refreshStored(){const next=load();if(JSON.stringify(next)!==JSON.stringify(data)){data=next;render();}}
+  window.addEventListener('storage',e=>{if(e.key===KEY)refreshStored();});
+  window.addEventListener('pageshow',refreshStored);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshStored();});
   render();
 })();

@@ -1,0 +1,36 @@
+name: RITMO preview automatico
+on:
+  push:
+    branches: [dev/auditoria-fuerza]
+    paths:
+      - 'RITMO_3_5_FIRST_SERVE_FONDO_VIVO_PAGES/**'
+      - 'tests/**'
+      - 'package*.json'
+      - '.github/workflows/pages-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ritmo-preview
+  cancel-in-progress: true
+jobs:
+  preview:
+    if: vars.RITMO_PREVIEW_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - name: Publicar solo la vista previa
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy RITMO_3_5_FIRST_SERVE_FONDO_VIVO_PAGES --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ vars.CLOUDFLARE_PREVIEW_BRANCH }}
