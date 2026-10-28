@@ -1,0 +1,10 @@
+RITMO 3.4 — THE FIRST SERVE integrado en Inicio
+
+Base: RITMO_3_3_PERFORMANCE_CORREGIDO.zip.
+Cambios: firstserve.css, firstserve.js; incorporación en Inicio en app.js; carga en index.html; cache PWA actualizado.
+Sin cambios: config.js, account.js, retas.js, extras.js, backend, tablas, endpoints y permisos.
+
+INSTALACIÓN: subir el contenido de este ZIP a Cloudflare Pages > ritmolh > Deployments. NO subir a Workers.
+GSAP y ScrollTrigger requieren Internet para cargar desde CDN; si fallan, Inicio sigue siendo utilizable y el scrollytelling queda estático.
+Primero comprobar en vista previa: Inicio, navegación a Retas, Google, cuenta, Fuerza, Focus, formularios y PWA.
+No se han ejecutado pruebas end-to-end en la cuenta Cloudflare del usuario.

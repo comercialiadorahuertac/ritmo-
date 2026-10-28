@@ -1,0 +1,6 @@
+RITMO 3.3 PERFORMANCE — Correcciones de UI y rutinas
+
+Subir el contenido de este ZIP como nuevo despliegue de Cloudflare Pages ritmolh.
+No se modifican config.js, account.js, retas.js ni el Worker.
+Biblioteca visual: datos y videos del repositorio open source buzops9/exercisedb (MIT, según repositorio). Se solicitan en línea desde GitHub; requieren conexión. Si no hay coincidencia o falla la red, se muestra un aviso, no una imagen inventada. Para producción conviene alojar copias verificadas de los recursos y validar las licencias individuales.
+Rutinas: 30 minutos automáticos: 5 min calentamiento + 20 min intervalos + 5 min cierre. Mantener app abierta para alertas.

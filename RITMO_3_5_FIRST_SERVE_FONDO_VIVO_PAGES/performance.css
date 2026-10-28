@@ -1,0 +1,39 @@
+/* Ritmo 3.2 Performance: navigation + accessible mobile layout */
+:root{--performance:#0e2b26;--lime:#c5f58e}
+body{background:#edf2ed}.app-shell{max-width:100%;background:#f5f7f2}.main-view{max-width:900px;margin:0 auto;padding:20px 20px calc(40px + env(safe-area-inset-bottom))}.site-header{max-width:100%;background:#102b28;color:#fff;padding:13px 22px;gap:15px;position:sticky;top:0;z-index:31;box-shadow:0 5px 24px #071b171f}.site-header .brand-title{color:white}.site-header .brand-title small{color:#a6c4b6}.site-header .brand-dot{color:#c5f58e}.site-header .round-button,.site-header .account-top-button{background:#25463e;color:white;border-color:#45665b}.sidebar-toggle{display:flex;flex-direction:column;justify-content:center;gap:5px;width:42px;height:42px;border:1px solid #537266;background:#23453c;border-radius:12px;flex:none;padding:11px}.sidebar-toggle span{height:2px;background:#c5f58e;width:100%;border-radius:2px}.bottom-nav{position:fixed!important;left:0!important;top:0!important;bottom:0!important;transform:translateX(-105%)!important;z-index:90!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;gap:6px!important;width:min(300px,85vw)!important;max-width:none!important;padding:23px 14px!important;background:#102b28!important;border:0!important;border-radius:0!important;box-shadow:10px 0 40px #00140f50!important;overflow-y:auto;transition:transform .25s ease!important}.bottom-nav.is-open{transform:translateX(0)!important}.sidebar-heading{display:flex;justify-content:space-between;align-items:center;color:white;padding:9px 8px 24px;gap:10px}.sidebar-heading strong{letter-spacing:1px}.sidebar-heading em{font-style:normal;display:block;font-size:9px;color:#b8ee8b;letter-spacing:2px;margin-top:4px}.sidebar-heading button{border:1px solid #47695b;background:#23453c;color:white;border-radius:10px;width:35px;height:35px;font-size:25px}.bottom-nav .nav-link{min-height:53px!important;display:flex!important;flex-direction:row!important;justify-content:flex-start!important;gap:16px!important;padding:10px 15px!important;font-size:14px!important;color:#bdd2c7!important;border-radius:13px;text-align:left}.bottom-nav .nav-link.is-active{background:#c5f58e!important;color:#102b28!important}.bottom-nav .nav-link.is-active .nav-icon{background:transparent!important}.sidebar-backdrop{position:fixed;inset:0;background:#00171099;z-index:89}.sidebar-backdrop[hidden]{display:none!important}.toast{bottom:24px}.extras-illustration{display:block;width:104px;height:78px;flex:none}.extras-illustration svg{width:100%;height:100%;display:block}.extras-item{gap:13px;text-align:left;min-height:94px}.extras-item>span:nth-child(2){flex:1;min-width:0}.extras-demo{background:none!important;min-height:180px!important;font-size:initial!important}.extras-demo svg{width:100%;max-height:260px}.extras-ball{width:65px;height:54px;display:block;flex:none}.extras-ball svg{width:100%;height:100%}.extras-card{box-shadow:0 5px 20px #16372b0a}.page-title{letter-spacing:-1.4px}.btn{transition:transform .14s,filter .14s}.btn:active{transform:scale(.97)}.reaction-panel{background:#102b28;color:#fff;border-radius:18px;padding:18px;text-align:center}.reaction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px auto;max-width:330px}.reaction-target{aspect-ratio:1;border:1px solid #34584c;background:#1b3c34;border-radius:16px;color:transparent;transition:background .12s}.reaction-target.active{background:#c5f58e;box-shadow:0 0 22px #c5f58e88}.reaction-target:focus-visible{outline:3px solid white}.reaction-score{font-size:17px;font-weight:800;color:#c5f58e}.reaction-panel .btn{margin-top:8px}@media(min-width:960px){.main-view{padding:32px 34px 70px}.site-header{padding-left:34px}}@media(max-width:500px){.site-header{padding:10px 13px}.brand-mark{width:34px;height:34px}.site-header .account-top-button{font-size:11px}.main-view{padding:18px 14px 35px}.extras-illustration{width:86px;height:70px}}@media(prefers-reduced-motion:reduce){.bottom-nav{transition:none!important}}
+/* Ritmo 3.3 — iPhone dialog repair, media, guided workout */
+#editor-dialog{width:min(680px,100vw)!important;max-width:100vw!important;max-height:min(91dvh,920px)!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;padding:20px 18px calc(22px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
+#editor-dialog #dialog-content{width:100%;min-width:0;display:flow-root;overflow-wrap:anywhere}
+#editor-dialog .dialog-top{position:sticky;top:-20px;background:#fff;z-index:4;padding:6px 0 12px;margin:0 0 8px}
+#editor-dialog .form-title{font-size:clamp(21px,5.5vw,28px);line-height:1.2;margin:0 0 14px;clear:both}
+#editor-dialog .extras-demo{height:auto!important;min-height:0!important;display:block!important;overflow:hidden!important;margin:10px 0 16px!important;background:#f0f4ef!important;border-radius:16px}
+#editor-dialog .extras-demo .ritmo-media{height:210px!important;max-height:38dvh!important;width:100%;margin:0}
+.ritmo-media{width:112px;height:88px;flex:none;display:grid;place-items:center;overflow:hidden;border-radius:13px;background:#e8efe8;color:#52675c;font-size:11px;text-align:center;line-height:1.3}
+.ritmo-media.large{width:100%;height:210px}
+.ritmo-media img{display:block;width:100%;height:100%;object-fit:cover}
+.media-placeholder{padding:10px;font-size:11px;font-weight:600}
+.extras-illustration{width:112px;height:88px;flex:none;background:transparent}
+.extras-illustration .ritmo-media{width:100%;height:100%}
+.extras-item{min-width:0;align-items:center;gap:12px;padding:13px 0}
+.extras-item>span:nth-child(2){min-width:0;flex:1}
+.extras-item b{font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.extras-ball{background:#e5f1e6;font-size:22px}
+.focus-symbol{font-size:30px;color:#285c4d}
+.guided-player{background:#102b28;border-radius:20px;color:#fff;padding:16px;margin:8px 0 16px;overflow:hidden}
+.guided-top{display:flex;justify-content:space-between;gap:10px;color:#c5f58e;font-size:11px;font-weight:800;letter-spacing:1px}
+.guided-media{height:190px;margin:14px 0 10px;border-radius:14px;overflow:hidden;background:#20453b;display:grid;place-items:center}
+.guided-media .ritmo-media{height:100%;width:100%;border-radius:0}
+.guided-media .ritmo-media img{object-fit:contain;background:#e8efe8}
+.guided-word{font-size:22px;font-weight:800;color:#d3efc6;text-align:center;padding:20px}
+.guided-title{font-size:20px;font-weight:850;line-height:1.2;min-height:50px}
+.guided-clock{font-size:clamp(42px,13vw,62px);font-weight:900;letter-spacing:-2px;font-variant-numeric:tabular-nums;text-align:center;color:#c5f58e;margin:8px 0}
+.guided-sub{text-align:center;font-size:13px;color:#d4e6d9}
+.guided-track{height:8px;border-radius:12px;background:#426056;overflow:hidden;margin:15px 0}
+.guided-track>div{height:100%;background:#c5f58e;width:0%;transition:width .2s}
+.guided-next{font-size:12px;color:#d4e6d9;line-height:1.5}
+.guided-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.guided-controls button:first-child{grid-column:1/-1;background:#c5f58e;color:#102b28}
+.guided-controls .btn{min-width:0}
+@media(max-width:430px){#editor-dialog{padding-left:15px!important;padding-right:15px!important}.extras-illustration{width:92px;height:74px}.extras-illustration .ritmo-media{height:74px;width:92px}.guided-media{height:155px}}
+
+.ritmo-media{position:relative}.media-play{position:absolute;bottom:6px;right:6px;border:0;border-radius:8px;background:#102b28;color:#fff;font-size:11px;font-weight:750;padding:6px 8px}.demo-video{width:100%;height:100%;object-fit:contain;background:#0b211d}

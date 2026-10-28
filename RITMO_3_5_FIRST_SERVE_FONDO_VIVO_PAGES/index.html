@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102b28">
+  <meta name="description" content="Ritmo: bienestar personal, partidos, retas con amigos y marcadores de tenis, pádel y pickleball.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Ritmo">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./firstserve.css"><link rel="stylesheet" href="./extras.css"><link rel="stylesheet" href="./performance.css">
+  <title>Ritmo Club · First Serve 3.4</title>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="site-header"><button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Abrir menú" aria-controls="side-nav" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="brand-wrap">
+        <div class="brand-mark" aria-hidden="true"><span>r</span><i></i></div>
+        <div class="brand-title">ritmo<span class="brand-dot">.</span><small>PLAN PERSONAL</small></div>
+      </div>
+      <div class="header-actions"><button id="club-account-btn" class="account-top-button" type="button">Mi cuenta</button><button id="settings-btn" class="round-button" type="button" aria-label="Configuración" title="Configuración">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.55V20h-2.55v-.12A1.7 1.7 0 0 0 11.4 18.3a1.7 1.7 0 0 0-1.87.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.06 15a1.7 1.7 0 0 0-1.55-1.03H6.4v-2.55h.12A1.7 1.7 0 0 0 8.06 10.4a1.7 1.7 0 0 0-.34-1.87l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.87.34A1.7 1.7 0 0 0 12.42 5.5v-.12h2.55v.12A1.7 1.7 0 0 0 16 7.06a1.7 1.7 0 0 0 1.87-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.87 1.7 1.7 0 0 0 1.55 1.03H21v2.55h-.12A1.7 1.7 0 0 0 19.4 15Z" transform="translate(-1 -1)"/></svg>
+      </button></div>
+    </header>
+    <main id="view" class="main-view" aria-live="polite">
+      <div class="loading-state">Preparando tu día…</div>
+    </main>
+    <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div><nav id="side-nav" class="bottom-nav" aria-label="Navegación principal"><div class="sidebar-heading"><strong>RITMO <em>PERFORMANCE</em></strong><button id="sidebar-close" type="button" aria-label="Cerrar menú">×</button></div>
+      <button class="nav-link is-active" data-tab="inicio" type="button"><span class="nav-icon" data-icon="home"></span><span>Inicio</span></button>
+      <button class="nav-link" data-tab="actividad" type="button"><span class="nav-icon" data-icon="activity"></span><span>Agenda</span></button>
+      <button class="nav-link" data-tab="retas" type="button"><span class="nav-icon" data-icon="ball"></span><span>Retas</span></button>
+      <button class="nav-link" data-tab="comidas" type="button"><span class="nav-icon" data-icon="utensils"></span><span>Comidas</span></button>
+      <button class="nav-link" data-tab="fuerza" type="button"><span class="nav-icon" data-icon="dumbbell"></span><span>Fuerza</span></button>
+      <button class="nav-link" data-tab="focus" type="button"><span class="nav-icon" data-icon="target"></span><span>Focus</span></button>
+      <button class="nav-link" data-tab="progreso" type="button"><span class="nav-icon" data-icon="chart"></span><span>Progreso</span></button>
+    </nav>
+  </div>
+  <dialog id="account-dialog" aria-label="Mi perfil deportivo"><div id="account-content"></div></dialog>
+  <dialog id="reta-dialog" aria-label="Retas y marcadores"><div id="reta-dialog-content"></div></dialog>
+  <dialog id="editor-dialog" aria-label="Editar registro"><div id="dialog-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js" defer></script>
+  <script src="./account.js" defer></script>
+  <script src="./retas.js" defer></script>
+  <script src="./extras.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/ScrollTrigger.min.js" defer></script>
+  <script src="./firstserve.js" defer></script>
+  <script src="./app.js" defer></script><script src="./performance.js" defer></script>
+</body>
+</html>
