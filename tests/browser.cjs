@@ -29,6 +29,17 @@ for(const [label,viewport,mobile] of [['desktop',{width:1440,height:1000},false]
  // Linked match updates move one agenda entry, maintain the status, and preserve unrelated data.
  await p.evaluate(()=>{const m={id:'test-linked',date:'2026-10-28',sport:'padel',time:'19:00',teams:[['A'],['B']],status:'programado'};window.RitmoAddSportMatch(m);window.RitmoAddSportMatch(m);window.RitmoAddSportMatch({...m,date:'2026-10-29',status:'jugando'});});let linked=await p.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('ritmo-pwa-data-v1')).days).flatMap(d=>d.sports).filter(s=>s.matchId==='test-linked'));assert.equal(linked.length,1);assert.equal(linked[0].status,'jugando');assert.equal(linked[0].done,false);
  await p.evaluate(()=>window.RitmoAddSportMatch({id:'test-linked',date:'2026-10-29',sport:'padel',time:'19:00',teams:[['A'],['B']],status:'finalizado'}));linked=await p.evaluate(()=>JSON.parse(localStorage.getItem('ritmo-pwa-data-v1')).days['2026-10-29'].sports);assert.equal(linked.length,1);assert.equal(linked[0].done,true);
+ // Statistics filters use real persisted workouts, without counting skipped-only sessions.
+ await p.evaluate(()=>window.RitmoNavigate('progreso'));
+ assert.equal(await p.locator('.statistics-panel').count(),1);
+ assert.match(await p.locator('.statistics-grid').innerText(),/Fuerza completa\s+1/);
+ assert.match(await p.locator('.statistics-grid').innerText(),/Fuerza parcial\s+0/);
+ await p.getByRole('button',{name:'30 días',exact:true}).click();assert.equal(await p.getByRole('button',{name:'30 días',exact:true}).getAttribute('aria-pressed'),'true');
+ await p.getByRole('button',{name:'Historial',exact:true}).click();
+ await p.getByText('Actividad por día y deporte',{exact:true}).click();
+ assert.ok(await p.locator('.statistics-bars meter').count()>0);
+ assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await p.screenshot({path:path.join(art,`statistics-${label}.png`),fullPage:true});
  assert.deepEqual(errors,[],`${label}: unhandled JS errors`);console.log(`PASS ${label}: equipment A/B/C, 52 photos, clock, pause, reload, complete, skip, 50 Focus guides, Focus clock, agenda upsert`);await context.close();
 }
 // Missing image: explicit error, never an unrelated fallback.
