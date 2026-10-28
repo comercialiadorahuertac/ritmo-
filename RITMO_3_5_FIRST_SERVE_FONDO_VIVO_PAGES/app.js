@@ -180,6 +180,7 @@
     document.querySelectorAll('.nav-link').forEach(el=>{el.classList.toggle('is-active',el.dataset.tab===currentTab);});
     document.querySelectorAll('.nav-icon').forEach(el=>el.innerHTML=ic(el.dataset.icon));
     view.innerHTML=({inicio:homeView,actividad:activityView,comidas:mealsView,fuerza:strengthView,progreso:progressView,focus:()=>window.RitmoExtras.focusView(),retas:()=>window.Retas.render(),ajustes:settingsView}[currentTab]||homeView)();
+    window.RitmoAmbient?.setScene(currentTab);
     if(window.RitmoFirstServe) window.RitmoFirstServe.sync(currentTab);
     document.title = `Ritmo · ${({'inicio':'Mi día','actividad':'Actividad','comidas':'Comidas','fuerza':'Fuerza','focus':'Focus','progreso':'Progreso','retas':'Retas','ajustes':'Configuración'})[currentTab]}`;
   }
@@ -211,7 +212,7 @@
       case 'prev-day': daySelected=addDays(daySelected,-1);render();break;
       case 'next-day': daySelected=addDays(daySelected,1);render();break;
       case 'today':daySelected=TODAY();render();break;
-      case 'tab':currentTab=el.dataset.tab;render();scrollTopSafe();break;
+      case 'tab':navigate(el.dataset.tab);break;
       case 'add-sport':sportDialog();break;
       case 'edit-sport':{const s=dayData(daySelected).sports.find(x=>x.id===el.dataset.id);if(s?.matchId){window.Retas?.openMatch(s.matchId);}else sportDialog(el.dataset.id);break;}
       case 'make-reta':{const s=(dayData(daySelected).sports||[]).find(x=>x.id===el.dataset.id);if(s){if(s.matchId){window.Retas?.openMatch(s.matchId);break;}currentTab='retas';render();window.Retas?.fromSport(s,daySelected);}break;}
@@ -234,7 +235,7 @@
     }
   }
   function scrollTopSafe(){window.scrollTo({top:0,behavior:'instant'});}
-  document.addEventListener('click',event=>{const t=event.target.closest('[data-action], [data-tab].nav-link');if(t){event.preventDefault();if(t.classList.contains('nav-link')){currentTab=t.dataset.tab;render();scrollTopSafe();}else handleAction(t);}});
+  document.addEventListener('click',event=>{const t=event.target.closest('[data-action], [data-tab].nav-link');if(t){event.preventDefault();if(t.classList.contains('nav-link')){navigate(t.dataset.tab);}else handleAction(t);}});
   document.getElementById('settings-btn').addEventListener('click',()=>{currentTab='ajustes';render();scrollTopSafe();});
   document.addEventListener('change',async e=>{
     if(e.target.id==='day-picker'&&/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)){daySelected=e.target.value;render();}
@@ -281,7 +282,8 @@
   if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
     window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('No se pudo habilitar modo sin conexión',e)));
   }
-  window.RitmoNavigate = (tab)=>{currentTab=tab;render();scrollTopSafe();};
+  function navigate(tab){if(tab==='fuerza'){location.assign('./fuerza.html');return;}currentTab=tab;render();scrollTopSafe();}
+  window.RitmoNavigate = navigate;
   window.RitmoAddSportMatch = (m,originId)=>{
     if(!m?.id||!/^\d{4}-\d{2}-\d{2}$/.test(m.date))return;
     let record=null;
