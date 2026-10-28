@@ -47,3 +47,11 @@ Después implementar, por prioridad:
 4. Pruebas de navegador móvil y escritorio, incluidos errores de medios, pausa, segundo plano, recarga, finalización y ausencia de doble registro.
 
 No se modificó main, producción, Supabase, OAuth, Worker, D1 ni PWA. Esta rama contiene únicamente documentación de la auditoría.
+
+## Actualización tras recibir el ZIP 3.6
+
+Se incorporó el frontend exacto del ZIP como commit separado de referencia y después se implementaron las correcciones descritas en README.md. El bloqueo de fuente de Fuerza quedó resuelto. El ZIP no incluye Worker ni migraciones D1; no se han modificado esas integraciones.
+
+Verificación: cinco pruebas de lógica aprobadas y pruebas Chromium aprobadas en escritorio y móvil emulado: 12 combinaciones de equipo/programa, 52 fotografías locales, transiciones automáticas, pausa, recarga, finalización idempotente, omisión sin falso completado, 50 guías Focus, temporizador Focus, cancelación de modal, error de fotografía, cuota de almacenamiento y reintento, conversión real de formulario local de Retas a Agenda, estado finalizado, gráfica de valores planos con fechas desiguales y funcionamiento PWA sin conexión.
+
+Los intervalos de 30 minutos se probaron con reloj virtual del navegador; no se afirma haber realizado una sesión física de 30 minutos. No se ha probado inicio de sesión real ni operaciones en backend remoto, ni Safari/iOS físico. No se ha fusionado a main ni publicado en producción.
